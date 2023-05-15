@@ -1,10 +1,11 @@
 import os
 import matplotlib.pyplot as plt
+import pandas as pd
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # or any {'0', '1', '2'}
 
 from network import TrainData, TestNet
-from data import read_config
+from data import read_config, create_hp_list, get_range, create_hp_combinations
 
 
 # Activation functions in keras: relu, sigmoid, softmax, softplus, softsign, tanh, selu, elu, exponential
@@ -23,14 +24,6 @@ activation_functions = [
 
 def is_activation_function(afun: str) -> bool:
     return afun in activation_functions
-
-
-def get_range(start: float, end: float, step: float) -> list:
-    array = []
-    while start <= end + step:
-        array.append(start)
-        start += step
-    return array
 
 
 def test_params(lrate: float, bsize: int, afun: str, train_data: TrainData) -> tuple:
@@ -72,47 +65,51 @@ def plot_results(parameter: str, results: list):
     plt.tight_layout()
     plt.show()
 
+def analyze_parameter(param_idx: int, parameter: list, results: pd.DataFrame):
+    importance_score = 0
+
+    losses = []
+    accuracies = []
+    for value in parameter:
+        filtered_results = results[results.iloc[:, param_idx] == value]
+        avg_loss = filtered_results["loss"].mean()
+        avg_acc = filtered_results["accuracy"].mean()
+        losses.append(avg_loss)
+        accuracies.append(avg_acc)
+
+    variance_loss = pd.Series(losses).var()
+    variance_acc = pd.Series(accuracies).var()
+    importance_score = variance_loss + variance_acc
+    return importance_score
+
+def analyze_results(hyperparameters: list, results: pd.DataFrame):
+    # This function analyzes the importance of the hyperparameters
+    importance_scores = []
+    for i, parameter in enumerate(hyperparameters):
+        importance_scores.append(analyze_parameter(i, parameter, results))
+    return importance_scores
+
 
 def main():
     config = read_config("configs/default.json")
+    hyperparameters = create_hp_list(config)
+    hp_permutations = create_hp_combinations(hyperparameters)
     train_data = TrainData()
 
-    learning_rate = config["learning_rate"]
-    batch_size = config["batch_size"]
-    activation_functions = config["activation_functions"]
-
-    rates = get_range(learning_rate["min"], learning_rate["max"], learning_rate["step"])
-    sizes = get_range(batch_size["min"], batch_size["max"], batch_size["step"])
-
-    def_lrate = rates[round(len(rates) / 2)]
-    def_bsize = sizes[round(len(sizes) / 2)]
-    def_afunc = activation_functions[0]
-
-    lrate_results = []
-    for lrate in rates:
-        print("\n\nTesting learning rate: " + str(lrate))
-        result = test_params(lrate, def_bsize, def_afunc, train_data)
-        lrate_results.append((lrate, result[0], result[1]))
-    # pretty_print("learning rate", lrate_results)
-
-    bsize_results = []
-    for bsize in sizes:
-        print("\n\nTesting batch size: " + str(bsize))
-        result = test_params(def_lrate, bsize, def_afunc, train_data)
-        bsize_results.append((bsize, result[0], result[1]))
-    # pretty_print("batch size", bsize_results)
-
-    afunc_results = []
-    for afunc in activation_functions:
-        print("\n\nTesting activation function: " + afunc)
-        result = test_params(def_lrate, def_bsize, afunc, train_data)
-        afunc_results.append((afunc, result[0], result[1]))
-    # pretty_print("activation function", afunc_results)
-
-    plot_results("learning rate", lrate_results)
-    plot_results("batch size", bsize_results)
-    plot_results("activation function", afunc_results)
-
+    # Iterate over all hyperparameter permutations
+    # The following dataframe will contain all permutations and the corresponding loss and accuracy for easier analysis
+    results = []
+    for permutation in hp_permutations:
+        lrate, bsize, afun = permutation
+        val_loss, val_acc = test_params(lrate, bsize, afun, train_data)
+        results.append([lrate, bsize, afun, val_loss, val_acc])
+    
+    results = pd.DataFrame(results, columns=["learning_rate", "batch_size", "activation_function", "loss", "accuracy"])
+    importance_scores = analyze_results(hyperparameters, results)
+    
+    print("Learning rate importance score: " + str(importance_scores[0]))
+    print("Batch size importance score: " + str(importance_scores[1]))
+    print("Activation function importance score: " + str(importance_scores[2]))
 
 if __name__ == "__main__":
     main()
