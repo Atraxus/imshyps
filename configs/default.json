@@ -9,8 +9,14 @@
         "max": 128
     },
     "activation_functions": [
-        "sigmoid",
         "relu",
-        "tanh"
+        "sigmoid",
+        "softmax",
+        "softplus",
+        "softsign",
+        "tanh",
+        "selu",
+        "elu",
+        "exponential"
     ]
 }

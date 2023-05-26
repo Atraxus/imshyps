@@ -42,6 +42,25 @@ def fanova(results: list):
     variance = sum([(val_loss - sum(val_losses) / len(val_losses))**2 for val_loss in val_losses]) / len(val_losses)
     return variance
 
+def plot_val_loss(hp_results: list, hyperparameter: str):
+    # This function plots the validation loss over the epochs for each hyperparameter
+    # As input it expects a list with hp_value - val_loss pairs
+    # val_loss is a list of validation losses for each epoch
+    hp_values = [hp_result[0] for hp_result in hp_results]
+    first_epoch = [hp_result[1][0] for hp_result in hp_results]
+    second_epoch = [hp_result[1][1] for hp_result in hp_results]
+    third_epoch = [hp_result[1][2] for hp_result in hp_results]
+    
+    # Make sure plot is reset
+    plt.clf()
+    plt.plot(hp_values, first_epoch, label="Epoch 1")
+    plt.plot(hp_values, second_epoch, label="Epoch 2")
+    plt.plot(hp_values, third_epoch, label="Epoch 3")
+    plt.xlabel(hyperparameter)
+    plt.ylabel("Validation loss")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig("./plots/" + hyperparameter.replace(" ", "_") + ".png", dpi=300)
 
 def analyze_results(hyperparameters: list, results: list):
     # This function analyzes the importance of the hyperparameters
@@ -88,6 +107,23 @@ def main():
         results.append(hp_results)
     
     analyze_results(hyperparameters, results)
+    # Plot lrate
+    lrate_results = []
+    for result in results[0]:
+        lrate_results.append((result[0], result[3]))
+    plot_val_loss(lrate_results, "Learning rate")
+
+    # Plot bsize
+    bsize_results = []
+    for result in results[1]:
+        bsize_results.append((result[1], result[3]))
+    plot_val_loss(bsize_results, "Batch size")
+
+    # Plot afun
+    afun_results = []
+    for result in results[2]:
+        afun_results.append((result[2], result[3]))
+    plot_val_loss(afun_results, "Activation function")
 
 if __name__ == "__main__":
     main()
