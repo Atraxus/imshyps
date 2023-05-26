@@ -5,13 +5,11 @@
 #     "name": "default",
 #     "learning_rate": {
 #         "min": 0.0001,
-#         "max": 0.001,
-#         "step": 0.0001
+#         "max": 0.001
 #     },
 #     "batch_size": {
 #         "min": 32,
-#         "max": 128,
-#         "step": 32
+#         "max": 128
 #     },
 #     "activation_functions": [
 #         "relu",
@@ -25,9 +23,9 @@ import json
 import pandas as pd
 import itertools
 
-def get_range(start: float, end: float, step: float) -> list:
-    # Returns a list of floats from start to end with step size step
-    return [start + i*step for i in range(int((end - start) // step) + 1)]
+def get_range(start: float, end: float, num_samples: int = 5) -> list:
+    # Returns a list of floats from start to end with num_samples number of points
+    return [start + i*(end-start)/(num_samples-1) for i in range(num_samples)]
 
 def read_config(path: str):
     # Reads a json config file and returns a dict
@@ -42,13 +40,9 @@ def create_hp_list(config: dict):
         if key == "name":
             continue
         if isinstance(value, dict):
-            hyperparameters.append(get_range(value["min"], value["max"], value["step"]))
+            hyperparameters.append(get_range(value["min"], value["max"]))
         elif isinstance(value, list):
             hyperparameters.append(value)
         else:
             raise ValueError("Invalid value type in config file.")
     return hyperparameters
-
-def create_hp_combinations(hyperparameters: list):
-    # Creates all possible permutations of the hyperparameters
-    return [list(p) for p in itertools.product(*hyperparameters)]

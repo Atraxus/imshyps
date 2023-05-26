@@ -2,13 +2,11 @@
     "name": "default",
     "learning_rate": {
         "min": 0.0001,
-        "max": 0.001,
-        "step": 0.0001
+        "max": 0.001
     },
     "batch_size": {
         "min": 32,
-        "max": 128,
-        "step": 32
+        "max": 128
     },
     "activation_functions": [
         "sigmoid",
