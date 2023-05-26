@@ -23,7 +23,7 @@ import json
 import pandas as pd
 import itertools
 
-def get_range(start: float, end: float, num_samples: int = 5) -> list:
+def get_samples(start: float, end: float, num_samples: int = 40) -> list:
     # Returns a list of floats from start to end with num_samples number of points
     return [start + i*(end-start)/(num_samples-1) for i in range(num_samples)]
 
@@ -40,7 +40,7 @@ def create_hp_list(config: dict):
         if key == "name":
             continue
         if isinstance(value, dict):
-            hyperparameters.append(get_range(value["min"], value["max"]))
+            hyperparameters.append(get_samples(value["min"], value["max"]))
         elif isinstance(value, list):
             hyperparameters.append(value)
         else:

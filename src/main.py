@@ -5,7 +5,7 @@ import pandas as pd
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # or any {'0', '1', '2'}
 
 from network import TrainData, TestNet
-from data import read_config, create_hp_list, get_range
+from data import read_config, create_hp_list, get_samples
 
 
 # Activation functions in keras: relu, sigmoid, softmax, softplus, softsign, tanh, selu, elu, exponential
@@ -30,26 +30,24 @@ def test_params(lrate: float, bsize: int, afun: str, train_data: TrainData) -> t
     if not is_activation_function(afun):
         raise ValueError("Invalid activation function")
     network = TestNet(lrate, bsize, afun)
-    test_loss, test_acc, validation_loss = network.train(train_data)
-    return test_loss, test_acc, validation_loss
+    validation_loss = network.train(train_data)
+    return validation_loss
+
+def fanova(results: list):
+    # This function applies the fANOVA algorithm to the results of a single hyperparameter and returns the importance score
+    val_losses = []
+    for result in results:
+        val_losses.append(sum(result[3]) / len(result[3])) # Average validation loss over all runs
+
+    variance = sum([(val_loss - sum(val_losses) / len(val_losses))**2 for val_loss in val_losses]) / len(val_losses)
+    return variance
+
 
 def analyze_results(hyperparameters: list, results: list):
     # This function analyzes the importance of the hyperparameters
-    lrate_importance = 0
-    bsize_importance = 0
-    afun_importance = 0
-
-    for result in results[0]:
-        lrate_importance += result[5]
-    lrate_importance /= len(results[0])
-
-    for result in results[1]:
-        bsize_importance += result[5]
-    bsize_importance /= len(results[1])
-
-    for result in results[2]:
-        afun_importance += result[5]
-    afun_importance /= len(results[2])
+    lrate_importance = fanova(results[0])
+    bsize_importance = fanova(results[1])
+    afun_importance =  fanova(results[2])
 
     print("Learning rate importance score: " + str(lrate_importance))
     print("Batch size importance score: " + str(bsize_importance))
@@ -85,8 +83,8 @@ def main():
             else:
                 raise ValueError("Invalid hyperparameter index")
         
-            test_loss, test_acc, validation_loss = test_params(lrate, bsize, afun, train_data)
-            hp_results.append([lrate, bsize, afun, test_loss, test_acc, validation_loss])
+            validation_loss = test_params(lrate, bsize, afun, train_data)
+            hp_results.append([lrate, bsize, afun, validation_loss])
         results.append(hp_results)
     
     analyze_results(hyperparameters, results)

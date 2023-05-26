@@ -59,9 +59,9 @@ class TestNet:
         history = self.model.fit(
             train_data.x_train, train_data.y_train, epochs=3, batch_size=self.batch_size, validation_data=(train_data.x_val, train_data.y_val)
         )
-        test_loss, test_acc = self.model.evaluate(train_data.x_test, train_data.y_test)
+        _, _ = self.model.evaluate(train_data.x_test, train_data.y_test)
         
         # Get validation loss from history object
         validation_loss = history.history['val_loss']
         
-        return test_loss, test_acc, validation_loss
+        return validation_loss
