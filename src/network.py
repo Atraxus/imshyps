@@ -27,7 +27,6 @@ class TrainData:
         )
 
 
-
 class TestNet:
     model: keras.Sequential
 
@@ -43,8 +42,10 @@ class TestNet:
         self.model = keras.models.Sequential()
 
         self.model.add(keras.layers.Flatten())
-        self.model.add(keras.layers.Dense(64, activation=self.activation_function))
-        self.model.add(keras.layers.Dense(64, activation=self.activation_function))
+        self.model.add(keras.layers.Dense(
+            64, activation=self.activation_function))
+        self.model.add(keras.layers.Dense(
+            64, activation=self.activation_function))
         self.model.add(keras.layers.Dense(10, activation=tf.nn.softmax))
 
         optimizer = keras.optimizers.Adam(learning_rate=self.learning_rate)
@@ -57,11 +58,11 @@ class TestNet:
     # Train function uses given learning_rate and batch_size
     def train(self, train_data: TrainData):
         history = self.model.fit(
-            train_data.x_train, train_data.y_train, epochs=3, batch_size=self.batch_size, validation_data=(train_data.x_val, train_data.y_val)
+            train_data.x_train, train_data.y_train, epochs=1, batch_size=self.batch_size, validation_data=(train_data.x_val, train_data.y_val)
         )
         _, _ = self.model.evaluate(train_data.x_test, train_data.y_test)
-        
+
         # Get validation loss from history object
         validation_loss = history.history['val_loss']
-        
+
         return validation_loss
