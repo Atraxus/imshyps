@@ -21,7 +21,7 @@
 
 import json
 import pandas as pd
-import itertools
+from paramhandler import HyperParameter, hp_type
 
 
 def get_samples(start: float, end: float, num_samples: int = 40) -> list:
@@ -30,22 +30,8 @@ def get_samples(start: float, end: float, num_samples: int = 40) -> list:
 
 
 def read_config(path: str):
-    # Reads a json config file and returns a dict
+    # Reads a json config file and returns a list of hyperparameters
     with open(path, "r") as f:
         config = json.load(f)
-    return config
-
-
-def create_hp_list(config: dict):
-    # Creates a list of all hyperparameters stripped of their names
     hyperparameters = []
-    for key, value in config.items():
-        if key == "name":
-            continue
-        if isinstance(value, dict):
-            hyperparameters.append(get_samples(value["min"], value["max"]))
-        elif isinstance(value, list):
-            hyperparameters.append(value)
-        else:
-            raise ValueError("Invalid value type in config file.")
-    return hyperparameters
+    

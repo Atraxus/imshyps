@@ -1,66 +1,53 @@
 import matplotlib.pyplot as plt
+from hyperparameter import HyperParameter
 
 
 def fanova(results: list):
     # This function applies the fANOVA algorithm to the results of a single hyperparameter and returns the importance score
-    val_losses = []
+    performances = []
     for result in results:
         # Average validation loss over all runs
-        val_losses.append(sum(result[3]) / len(result[3]))
+        performances.append(sum(result[3]) / len(result[3]))
 
-    variance = sum([(val_loss - sum(val_losses) / len(val_losses))
-                   ** 2 for val_loss in val_losses]) / len(val_losses)
+    variance = sum([(performance - sum(performances) / len(performances))
+                   ** 2 for performance in performances]) / len(performances)
     return variance
 
 
 # TODO(Jannis): Epochs as parameter here are inelegant
-def plot_val_loss(hp_results: list, hyperparameter: str, num_epochs: int = 1):
-    # This function plots the validation loss over the epochs for each hyperparameter
-    # As input it expects a list with hp_value - val_loss pairs
-    # val_loss is a list of validation losses for each epoch
-    hp_values = [hp_result[0] for hp_result in hp_results]
-    epochs = []
-    for i in range(num_epochs):
-        epochs.append([hp_result[1][i] for hp_result in hp_results])
-
+def plot_hp(performances: list, hyperparameter: str):
+    x = [tup[1] for tup in performances]
+    y = [tup[0] for tup in performances]
     # Make sure plot is reset
     plt.clf()
-    for i, epoch in enumerate(epochs):
-        plt.plot(hp_values, epoch, label="Epoch " + str(i + 1))
+    plt.plot(x, y, label=hyperparameter)
     plt.xlabel(hyperparameter)
-    plt.ylabel("Validation loss")
+    plt.ylabel("Performance Metric")
     plt.legend()
     plt.tight_layout()
     plt.savefig("./plots/" + hyperparameter.replace(" ", "_") + ".png", dpi=300)
 
 
-def analyze_results(hyperparameters: list, results: list):
-    # This function analyzes the importance of the hyperparameters
-    lrate_importance = fanova(results[0])
-    bsize_importance = fanova(results[1])
-    afun_importance = fanova(results[2])
+def get_unique_tuples(input_list):
+    unique_tuples = {}
+    for tup in input_list:
+        key = tup[1]
+        if key not in unique_tuples:
+            unique_tuples[key] = tup
+    return list(unique_tuples.values())
 
-    print("Learning rate importance score: " + str(lrate_importance))
-    print("Batch size importance score: " + str(bsize_importance))
-    print("Activation function importance score: " + str(afun_importance))
+
+def get_performances(results: list, param: str, defaults: list):
+    # Returns a list of tuples (performance, hyperparameter value) for a given hyperparameter
+    performances = [(perf, hp[param]) for perf, hp in results]
+    unique_perfs = get_unique_tuples(performances)
+    # Make sure its sorted by hyperparameter value
+    unique_perfs.sort(key=lambda tup: tup[1])
+    return unique_perfs
 
 
 def analysis(results: list, hyperparameters: list):
-    analyze_results(hyperparameters, results)
-    # Plot lrate
-    lrate_results = []
-    for result in results[0]:
-        lrate_results.append((result[0], result[3]))
-    plot_val_loss(lrate_results, "Learning rate")
-
-    # Plot bsize
-    bsize_results = []
-    for result in results[1]:
-        bsize_results.append((result[1], result[3]))
-    plot_val_loss(bsize_results, "Batch size")
-
-    # Plot afun
-    afun_results = []
-    for result in results[2]:
-        afun_results.append((result[2], result[3]))
-    plot_val_loss(afun_results, "Activation function")
+    defaults = [(param.name, param.default) for param in hyperparameters]
+    for hp in hyperparameters:
+        accuracies = get_performances(results, hp.name, defaults)
+        plot_hp(accuracies, hp.name)
