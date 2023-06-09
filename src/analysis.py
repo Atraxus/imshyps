@@ -29,6 +29,7 @@ def plot_hp(performances: list, hyperparameter: str):
 
 
 def get_unique_tuples(input_list):
+    # TODO(Jannis): Currently taking the first tuple with a given key (greedy)
     unique_tuples = {}
     for tup in input_list:
         key = tup[1]
