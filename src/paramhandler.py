@@ -51,7 +51,7 @@ class ParamHandler:
     train_data: TrainData
     metrics: list
 
-    def __init__(self, model_class: type, model_hparams: list, config_path: str = "configs/default.json"):
+    def __init__(self, model_class: type, model_hparams: list, config_path: str):
         self.model = None
         self.model_class = model_class
         self.MODEL_HPARAMS = model_hparams
@@ -86,6 +86,8 @@ class ParamHandler:
                 param_dict = dict(defaults)
                 param_dict[param.name] = value
                 model = self.model_class(param_dict, self.metrics)
+                print(
+                    f"Running model with parameters {param_dict}")
                 result = model.evaluate(self.train_data)
                 results.append((result, param_dict))
         return results

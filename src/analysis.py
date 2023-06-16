@@ -46,8 +46,9 @@ def get_performances(results: list, param: str, defaults: list):
     return unique_perfs
 
 
-def analysis(results: list, hyperparameters: list):
+def analysis(model_name: str, results: list, hyperparameters: list):
     defaults = [(param.name, param.default) for param in hyperparameters]
     for hp in hyperparameters:
         accuracies = get_performances(results, hp.name, defaults)
-        plot_hp(accuracies, hp.name)
+        plot_name = model_name + "_" + hp.name.replace(" ", "_")
+        plot_hp(accuracies, plot_name)

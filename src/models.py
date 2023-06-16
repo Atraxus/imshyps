@@ -105,3 +105,30 @@ class MLP(Model):
         _, accuracy = self.model.evaluate(
             train_data.x_test, train_data.y_test)
         return accuracy
+
+
+class RandomForest(Model):
+    model: RandomForestClassifier
+    metrics: list
+    hyperparameters: dict
+    MODEL_HPARAMS = ["n_estimators", "max_depth",
+                     "min_samples_split", "min_samples_leaf"]
+
+    def __init__(self, hyperparameters: dict, metrics: list = [EvalMetrics.ACCURACY]):
+        self.hyperparameters = hyperparameters
+        self.metrics = metrics
+
+        self.model = RandomForestClassifier(n_estimators=self.hyperparameters["n_estimators"],
+                                            max_depth=self.hyperparameters["max_depth"],
+                                            min_samples_split=self.hyperparameters["min_samples_split"],
+                                            min_samples_leaf=self.hyperparameters["min_samples_leaf"])
+
+    def evaluate(self, train_data: TrainData):
+        # Flatten the data
+        x_train = train_data.x_train.reshape(train_data.x_train.shape[0], -1)
+        x_test = train_data.x_test.reshape(train_data.x_test.shape[0], -1)
+
+        self.model.fit(x_train, train_data.y_train)
+        predictions = self.model.predict(x_test)
+        accuracy = accuracy_score(train_data.y_test, predictions)
+        return accuracy
