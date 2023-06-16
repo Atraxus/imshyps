@@ -27,23 +27,29 @@ def plot_hp(performances: list, hyperparameter: str):
     plt.savefig("./plots/" + hyperparameter.replace(" ", "_") + ".png", dpi=300)
 
 
-def get_unique_tuples(input_list):
-    # TODO(Jannis): Currently taking the first tuple with a given key (greedy)
-    unique_tuples = {}
-    for tup in input_list:
-        key = tup[1]
-        if key not in unique_tuples:
-            unique_tuples[key] = tup
-    return list(unique_tuples.values())
+def filter_results_for_hyperparameter(results: list, param_name: str, defaults: list):
+    # Convert default_values list of tuples to a dictionary for easier lookup
+    default_dict = dict(defaults)
+
+    # We will retain only those results where all parameters are at their default values,
+    # except possibly for the one we're interested in.
+    filtered_results = []
+    for result in results:
+        accuracy, params = result
+        if all(params[hp] == default_dict[hp] for hp in params if hp != param_name):
+            filtered_results.append(result)
+    return filtered_results
 
 
-def get_performances(results: list, param: str, defaults: list):
+def get_performances(results: list, param_name: str, defaults: list):
+    # Filter so that all results have default values for all hyperparameters except the one we are interested in
+    results = filter_results_for_hyperparameter(results, param_name, defaults)
+
     # Returns a list of tuples (performance, hyperparameter value) for a given hyperparameter
-    performances = [(perf, hp[param]) for perf, hp in results]
-    unique_perfs = get_unique_tuples(performances)
+    performances = [(perf, hp[param_name]) for perf, hp in results]
     # Make sure its sorted by hyperparameter value
-    unique_perfs.sort(key=lambda tup: tup[1])
-    return unique_perfs
+    performances.sort(key=lambda tup: tup[1])
+    return performances
 
 
 def analysis(model_name: str, results: list, hyperparameters: list):
