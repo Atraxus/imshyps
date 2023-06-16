@@ -1,4 +1,4 @@
-from network import TrainData, MLP
+from models import TrainData, Model
 from hyperparameter import HyperParameter
 
 import json
@@ -43,15 +43,18 @@ def get_param_samples(param_def):
         return None
 
 
-
 class ParamHandler:
-    model: MLP
+    model: Model
+    model_class: type
+    MODEL_HPARAMS = []
     params: list
     train_data: TrainData
     metrics: list
 
-    def __init__(self, config_path: str = "configs/default.json"):
+    def __init__(self, model_class: type, model_hparams: list, config_path: str = "configs/default.json"):
         self.model = None
+        self.model_class = model_class
+        self.MODEL_HPARAMS = model_hparams
         self.params_from_config(config_path)
         self.train_data = TrainData()
 
@@ -61,17 +64,17 @@ class ParamHandler:
         self.metrics = config["metrics"]
         cfg_params = config["params"]
         self.params = []
-        for hp in MLP.MODEL_HPARAMS:
+        for hp in self.MODEL_HPARAMS:
             if hp not in cfg_params:
                 raise ValueError("Invalid config file")
-            
+
             param_cfg = cfg_params[hp]
             samples = get_param_samples(param_cfg)
             default = param_cfg["default"]
-            
+
             param = HyperParameter(hp, samples, default)
             self.params.append(param)
-    
+
     def total_num_samples(self):
         return np.sum([len(param.samples) for param in self.params])
 
@@ -82,10 +85,7 @@ class ParamHandler:
             for value in param:
                 param_dict = dict(defaults)
                 param_dict[param.name] = value
-                model = MLP(param_dict, self.metrics)
+                model = self.model_class(param_dict, self.metrics)
                 result = model.evaluate(self.train_data)
                 results.append((result, param_dict))
         return results
-        
-
-        

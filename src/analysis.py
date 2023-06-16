@@ -14,7 +14,6 @@ def fanova(results: list):
     return variance
 
 
-# TODO(Jannis): Epochs as parameter here are inelegant
 def plot_hp(performances: list, hyperparameter: str):
     x = [tup[1] for tup in performances]
     y = [tup[0] for tup in performances]

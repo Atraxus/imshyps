@@ -1,10 +1,17 @@
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+from enum import Enum
+from abc import ABC, abstractmethod
 import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # or any {'0', '1', '2'}
-import tensorflow.keras as keras
-import tensorflow as tf
 
-from enum import Enum
-from sklearn.model_selection import train_test_split
+# fmt: off
+# This needs to be here to avoid stdout spam from tensorflow
+import tensorflow as tf
+import tensorflow.keras as keras
+# fmt: on
+
 
 class TrainData:
     x_train: tf.Tensor
@@ -41,7 +48,25 @@ class EvalMetrics(Enum):
     AUC = "AUC"
 
 
-class MLP:
+class Model(ABC):
+    # List of hyperparameters that the model needs. These will be read from the config file.
+    # If a config file does not contain all of these, it is invalid.
+    # Parameters that are not in this list will be ignored.
+    MODEL_HPARAMS = []
+
+    @abstractmethod
+    # Initialize the model with the given hyperparameters. It is a dict with key-value pairs.
+    # The default metric used for evaluation is accuracy.
+    def __init__(self, hyperparameters: dict, metrics: list = [EvalMetrics.ACCURACY]):
+        pass
+
+    @abstractmethod
+    # Train the model and return the accuracy
+    def evaluate(self, train_data: TrainData):
+        pass
+
+
+class MLP(Model):
     model: keras.Sequential
     metrics: list
     hyperparameters: dict
@@ -73,7 +98,7 @@ class MLP:
         self.model.fit(
             train_data.x_train,
             train_data.y_train,
-            epochs=1, # TODO: make this a hyperparameter
+            epochs=1,  # Currently, there seems to be no benefit to training for more than 1 epoch to evaluate the model
             batch_size=self.hyperparameters["batch_size"],
             validation_data=(train_data.x_val, train_data.y_val),
         )
