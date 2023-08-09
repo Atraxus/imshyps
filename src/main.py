@@ -2,17 +2,13 @@
 from analysis import analysis
 
 # ! To change the network used, change the following line to import other network as MODEL.
-# ! You will also change the config file used
 from models import EchoStateNetwork as MODEL
 from paramhandler import ParamHandler
 
-# from data import generate_random_results
-
-
-config_path = "configs/esn.json"  # ! Change this to fit the model
-
 
 def main():
+    config_path = "configs/esn.json"  # ! Change this to fit the model
+
     # Paramhandler is initialized with the network class and the hyperparameters that the network needs.
     param_handler = ParamHandler(MODEL, MODEL.MODEL_HPARAMS, config_path)
     print(

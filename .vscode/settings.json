@@ -2,5 +2,6 @@
   "[python]": {
     "editor.defaultFormatter": "trunk.io"
   },
-  "python.formatting.provider": "none"
+  "python.formatting.provider": "none",
+  "python.analysis.typeCheckingMode": "off"
 }

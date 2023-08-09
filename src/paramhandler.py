@@ -23,20 +23,15 @@ def is_activation_function(afun: str) -> bool:
     return afun in activation_functions
 
 
-def get_samples(start: float, end: float, num_samples: int = 40) -> list:
-    # Returns a list of floats from start to end with num_samples number of points
-    return [start + i * (end - start) / (num_samples - 1) for i in range(num_samples)]
-
-
 # Returns samples for a given parameter definition
 # Respects the type and removes duplicates
 # E.g. if type is int and we have samples in [1,3] then we return 1,2,3
 def get_param_samples(param_def):
     if param_def["type"] == "float":
-        return np.linspace(param_def["min"], param_def["max"], 40).tolist()
+        return np.linspace(param_def["min"], param_def["max"], 2).tolist()
     elif param_def["type"] == "int":
         return (
-            np.unique(np.round(np.linspace(param_def["min"], param_def["max"], 40)))
+            np.unique(np.round(np.linspace(param_def["min"], param_def["max"], 2)))
             .astype(int)
             .tolist()
         )

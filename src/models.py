@@ -15,11 +15,9 @@ import tensorflow_addons as tfa  # trunk-ignore(ruff/E402)
 from tensorflow import keras  # trunk-ignore(ruff/E402)
 
 
-class TrainData:  # TODO: Remove validation set
+class TrainData:
     x_train: tf.Tensor
     y_train: tf.Tensor
-    x_val: tf.Tensor
-    y_val: tf.Tensor
     x_test: tf.Tensor
     y_test: tf.Tensor
 
@@ -27,15 +25,11 @@ class TrainData:  # TODO: Remove validation set
         self,
         x_train: tf.Tensor,
         y_train: tf.Tensor,
-        x_val: tf.Tensor,
-        y_val: tf.Tensor,
         x_test: tf.Tensor,
         y_test: tf.Tensor,
     ):
         self.x_train = x_train
         self.y_train = y_train
-        self.x_val = x_val
-        self.y_val = y_val
         self.x_test = x_test
         self.y_test = y_test
 
@@ -130,12 +124,7 @@ class MLP(Model):
         x_train = keras.utils.normalize(x_train, axis=1)
         x_test = keras.utils.normalize(x_test, axis=1)
 
-        # split training data into training and validation sets
-        x_train, x_val, y_train, y_val = train_test_split(
-            x_train, y_train, test_size=test_size  # TODO: This does not make sense
-        )
-
-        return TrainData(x_train, y_train, x_val, y_val, x_test, y_test)
+        return TrainData(x_train, y_train, x_test, y_test)
 
     # Train the model and return the accuracy
     def evaluate(self, train_data: TrainData):
@@ -144,7 +133,6 @@ class MLP(Model):
             train_data.y_train,
             epochs=10,
             batch_size=self.hyperparameters["batch_size"],
-            validation_data=(train_data.x_val, train_data.y_val),
         )
         _, accuracy = self.model.evaluate(train_data.x_test, train_data.y_test)
         return accuracy
@@ -194,10 +182,7 @@ class EchoStateNetwork(Model):
             x, y, test_size=test_size, shuffle=True
         )
 
-        x_train, x_val, y_train, y_val = train_test_split(
-            x, y, test_size=test_size, shuffle=True
-        )
-        return TrainData(x_train, y_train, x_val, y_val, x_test, y_test)
+        return TrainData(x_train, y_train, x_test, y_test)
 
     def evaluate(self, train_data: TrainData):
         self.model.fit(train_data.x_train, train_data.y_train, epochs=1000)
@@ -263,9 +248,8 @@ class GFZ_CNN(Model):
         self.model.fit(
             train_data.x_train,
             train_data.y_train,
-            epochs=1,
+            epochs=10,
             batch_size=self.hyperparameters["batch_size"],
-            validation_data=(train_data.x_val, train_data.y_val),
         )
         _, accuracy = self.model.evaluate(train_data.x_test, train_data.y_test)
         return accuracy
