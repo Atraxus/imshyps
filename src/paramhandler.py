@@ -1,9 +1,9 @@
-from models import TrainData, Model
-from hyperparameter import HyperParameter
-
 import json
+
 import numpy as np
 
+from hyperparameter import HyperParameter
+from models import Model, TrainData
 
 # Activation functions in keras: relu, sigmoid, softmax, softplus, softsign, tanh, selu, elu, exponential
 activation_functions = [
@@ -25,22 +25,28 @@ def is_activation_function(afun: str) -> bool:
 
 def get_samples(start: float, end: float, num_samples: int = 40) -> list:
     # Returns a list of floats from start to end with num_samples number of points
-    return [start + i*(end-start)/(num_samples-1) for i in range(num_samples)]
+    return [start + i * (end - start) / (num_samples - 1) for i in range(num_samples)]
 
 
 # Returns samples for a given parameter definition
 # Respects the type and removes duplicates
 # E.g. if type is int and we have samples in [1,3] then we return 1,2,3
 def get_param_samples(param_def):
-    if "min" in param_def and "max" in param_def:
-        if param_def["type"] == "float":
-            return np.linspace(param_def["min"], param_def["max"], 40).tolist()
-        elif param_def["type"] == "int":
-            return np.unique(np.round(np.linspace(param_def["min"], param_def["max"], 40))).astype(int).tolist()
-    elif "samples" in param_def:
+    if param_def["type"] == "float":
+        return np.linspace(param_def["min"], param_def["max"], 40).tolist()
+    elif param_def["type"] == "int":
+        return (
+            np.unique(np.round(np.linspace(param_def["min"], param_def["max"], 40)))
+            .astype(int)
+            .tolist()
+        )
+    elif param_def["type"] == "bool":
+        return [True, False]
+    elif param_def["type"] == "str":
         return param_def["samples"]
     else:
-        return None
+        print("Invalid type in config file!")
+        exit(1)
 
 
 class ParamHandler:
@@ -56,7 +62,10 @@ class ParamHandler:
         self.model_class = model_class
         self.MODEL_HPARAMS = model_hparams
         self.params_from_config(config_path)
-        self.train_data = TrainData()
+        self.train_data = None
+
+    def load_data(self, input_path: str, target_path: str, test_size: float = 0.2):
+        self.train_data = self.model_class.load_data(input_path, target_path, test_size)
 
     def params_from_config(self, path: str):
         with open(path, "r") as f:
@@ -79,15 +88,16 @@ class ParamHandler:
         return np.sum([len(param.samples) for param in self.params])
 
     def run(self):
+        if self.train_data is None:
+            raise ValueError("Train data not loaded")
         defaults = [(param.name, param.default) for param in self.params]
         results = []
-        for i, param in enumerate(self.params):
+        for param in self.params:
             for value in param:
                 param_dict = dict(defaults)
                 param_dict[param.name] = value
                 model = self.model_class(param_dict, self.metrics)
-                print(
-                    f"Running model with parameters {param_dict}")
+                print(f"Running model with parameters {param_dict}")
                 result = model.evaluate(self.train_data)
                 results.append((result, param_dict))
         return results

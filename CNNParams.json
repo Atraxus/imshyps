@@ -1,0 +1,197 @@
+"hyperparameter_arguments": [
+    {
+        "name": "structured_data_block_1/normalize",
+        "data_type": "boolean",
+        "type": "init",
+        "default": true,
+        "value": true,
+        "description": "Perform feature-wise normalization on data."
+    },
+    {
+        "name": "structured_data_block_1/dense_block_1/use_batchnorm",
+        "data_type": "boolean",
+        "type": "init",
+        "default": false,
+        "value": false,
+        "description": "Layer that normalizes its inputs."
+    },
+    {
+        "name": "structured_data_block_1/dense_block_1/num_layers",
+        "data_type": "int",
+        "type": "init",
+        "default": "2",
+        "min": 1,
+        "max": 5,
+        "description": "The number of Dense layers in the block",
+        "values": [
+            "2",
+            "3"
+        ],
+        "steps": 1
+    },
+    {
+        "name": "structured_data_block_1/dense_block_1/units_0",
+        "data_type": "int",
+        "type": "init",
+        "default": "400",
+        "min": 100,
+        "max": 2000,
+        "description": "The number of units in each dense layer",
+        "values": [
+            "200",
+            "400",
+            "600",
+            "800",
+            "1000",
+            "1200",
+            "1400",
+            "1600",
+            "1800",
+            "2000"
+        ],
+        "steps": 200
+    },
+    {
+        "name": "structured_data_block_1/dense_block_1/dropout",
+        "data_type": "float",
+        "type": "fit",
+        "min": 0,
+        "max": 1,
+        "default": "0",
+        "description": "Float between 0 and 1. Fraction of the input units to drop.",
+        "steps": 0.1
+    },
+    {
+        "name": "structured_data_block_1/dense_block_1/units_1",
+        "data_type": "int",
+        "type": "init",
+        "default": "400",
+        "min": 100,
+        "max": 2000,
+        "description": "The number of units in each dense layer",
+        "values": [
+            "200",
+            "400",
+            "600",
+            "800",
+            "1000",
+            "1200",
+            "1400",
+            "1600",
+            "1800",
+            "2000"
+        ],
+        "steps": 200
+    },
+    {
+        "name": "classification_head_1/dropout",
+        "data_type": "float",
+        "type": "fit",
+        "min": 0,
+        "max": 1,
+        "default": "0",
+        "description": "Float between 0 and 1. Fraction of the input units to drop.",
+        "steps": 0.1
+    },
+    {
+        "name": "optimizer",
+        "data_type": "object",
+        "type": "init",
+        "default": "adam",
+        "description": "The stepsize of each iteration for the loss function",
+        "values": [
+            "adam",
+            "sgd",
+            "adam_weight_decay"
+        ],
+        "values_selected": [
+            "adam",
+            "sgd",
+            "adam_weight_decay"
+        ],
+        "steps": -1
+    },
+    {
+        "name": "learning_rate",
+        "data_type": "object",
+        "type": "init",
+        "default": "0.001",
+        "min": 0.000001,
+        "max": 0.1,
+        "description": "The stepsize of each iteration for the loss function",
+        "values": [
+            "0.000001",
+            "0.00001",
+            "0.0001",
+            "0.001",
+            "0.01",
+            "0.1"
+        ],
+        "values_selected": [
+            "0.000001",
+            "0.00001",
+            "0.0001",
+            "0.001",
+            "0.01",
+            "0.1"
+        ],
+        "steps": -1
+    }
+],
+"advanced_arguments": [
+    {
+        "name": "num_classes",
+        "data_type": "int",
+        "type": "init",
+        "min": 2,
+        "default": "None",
+        "description": "If None, it will be inferred from the data."
+    },
+    {
+        "name": "metrics",
+        "data_type": "string[]",
+        "type": "init",
+        "default": "None",
+        "description": "Performance metrics: List of Keras metrics used to evaluate performance of selected model after training.",
+        "values": [
+            "accuracy",
+            "iou",
+            "precision",
+            "recall",
+            "root_mean_squared_error",
+            "false_negatives",
+            "false_positives",
+            "true_negatives",
+            "true_positives"
+        ]
+    },
+    {
+        "name": "loss",
+        "data_type": "string",
+        "type": "init",
+        "default": "None",
+        "description": "Loss function: A Keras loss function used to evaluate performance of selected model during training process.",
+        "values": [
+            "binary_crossentropy",
+            "categorical_crossentropy",
+            "mean_squared_error",
+            "hinge",
+            "huber"
+        ]
+    }
+],
+"tuner_arguments": [
+    {
+        "name": "tuner",
+        "data_type": "string",
+        "type": "init",
+        "default": "None",
+        "description": "Algorithm used to search the hyperparameter space of the model. If unspecified, the system uses a specific search strategy, which first evaluates the most commonly models for the selected ML task before exploring other models.",
+        "values": [
+            "greedy",
+            "random",
+            "bayesian",
+            "hyperband"
+        ]
+    }
+]

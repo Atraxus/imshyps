@@ -19,31 +19,18 @@
 # }
 
 
-import itertools
-import random
 import json
-import pandas as pd
+import random
+
 from paramhandler import get_param_samples
 
 
-def get_samples(start: float, end: float, num_samples: int = 40) -> list:
-    # Returns a list of floats from start to end with num_samples number of points
-    return [start + i*(end-start)/(num_samples-1) for i in range(num_samples)]
-
-
-def read_config(path: str):
-    # Reads a json config file and returns a list of hyperparameters
-    with open(path, "r") as f:
-        config = json.load(f)
-    hyperparameters = []
-
-
+# This function generates random results for the dummy model
 def generate_random_results(config_path: str = "configs/mlp.json"):
     with open(config_path, "r") as f:
         config = json.load(f)
     cfg_params = config["params"]
-    default_params = {name: details["default"]
-                      for name, details in cfg_params.items()}
+    default_params = {name: details["default"] for name, details in cfg_params.items()}
 
     results = []
     seen_hyperparameters = set()  # This set keeps track of already seen hyperparameters

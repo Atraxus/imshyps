@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-from hyperparameter import HyperParameter
 
 
 def fanova(results: list):
@@ -9,8 +8,12 @@ def fanova(results: list):
         # Average validation loss over all runs
         performances.append(sum(result[3]) / len(result[3]))
 
-    variance = sum([(performance - sum(performances) / len(performances))
-                   ** 2 for performance in performances]) / len(performances)
+    variance = sum(
+        [
+            (performance - sum(performances) / len(performances)) ** 2
+            for performance in performances
+        ]
+    ) / len(performances)
     return variance
 
 

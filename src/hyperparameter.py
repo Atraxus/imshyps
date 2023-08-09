@@ -1,4 +1,3 @@
-
 class HyperParameter:
     name: str
     samples: list
