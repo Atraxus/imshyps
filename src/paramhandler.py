@@ -1,37 +1,24 @@
+import gc
 import json
 
 import numpy as np
+import tensorflow as tf
 
 from hyperparameter import HyperParameter
 from models import Model, TrainData
-
-# Activation functions in keras: relu, sigmoid, softmax, softplus, softsign, tanh, selu, elu, exponential
-activation_functions = [
-    "relu",
-    "sigmoid",
-    "softmax",
-    "softplus",
-    "softsign",
-    "tanh",
-    "selu",
-    "elu",
-    "exponential",
-]
-
-
-def is_activation_function(afun: str) -> bool:
-    return afun in activation_functions
 
 
 # Returns samples for a given parameter definition
 # Respects the type and removes duplicates
 # E.g. if type is int and we have samples in [1,3] then we return 1,2,3
-def get_param_samples(param_def):
+def get_param_samples(param_def, num_samples=40):
     if param_def["type"] == "float":
-        return np.linspace(param_def["min"], param_def["max"], 2).tolist()
+        return np.linspace(param_def["min"], param_def["max"], num_samples).tolist()
     elif param_def["type"] == "int":
         return (
-            np.unique(np.round(np.linspace(param_def["min"], param_def["max"], 2)))
+            np.unique(
+                np.round(np.linspace(param_def["min"], param_def["max"], num_samples))
+            )
             .astype(int)
             .tolist()
         )
@@ -59,7 +46,9 @@ class ParamHandler:
         self.params_from_config(config_path)
         self.train_data = None
 
-    def load_data(self, input_path: str, target_path: str, test_size: float = 0.2):
+    def load_data(
+        self, input_path: str = None, target_path: str = None, test_size: float = 0.2
+    ):
         self.train_data = self.model_class.load_data(input_path, target_path, test_size)
 
     def params_from_config(self, path: str):
@@ -82,6 +71,8 @@ class ParamHandler:
     def total_num_samples(self):
         return np.sum([len(param.samples) for param in self.params])
 
+    # Run the model for all combinations of hyperparameters and return the results
+    # Results are a list of tuples (result, hyperparameters) for each combination
     def run(self):
         if self.train_data is None:
             raise ValueError("Train data not loaded")
@@ -95,4 +86,8 @@ class ParamHandler:
                 print(f"Running model with parameters {param_dict}")
                 result = model.evaluate(self.train_data)
                 results.append((result, param_dict))
+
+                del model
+                tf.keras.backend.clear_session()
+                gc.collect()
         return results

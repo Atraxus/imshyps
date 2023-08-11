@@ -1,0 +1,14 @@
+EchoStateNetwork (normalization: True, num samples: 4)
+num_units: 0.13976189827119723
+leakage: 0.00029876661771628216
+connectivity: 8.612761615983677e-06
+spectral_radius: 0.0001309925104538241
+learning_rate: 0.17964205845593098
+
+EchoStateNetwork (normalization: True, num samples: 40)
+num_units: 0.01935747429429748
+leakage: 8.818226223732691e-05
+connectivity: 4.94149039040629e-05
+spectral_radius: 3.855358960872978e-05
+learning_rate: 0.02647025779110094
+

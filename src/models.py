@@ -2,6 +2,7 @@ import os
 from abc import ABC, abstractmethod
 from enum import Enum
 
+import numpy as np
 import xarray as xr
 from numpy import genfromtxt
 from sklearn.model_selection import train_test_split
@@ -110,7 +111,6 @@ class MLP(Model):
             optimizer=optimizer,
             loss="sparse_categorical_crossentropy",
             metrics=metrics,
-            learning_rate=self.hyperparameters["learning_rate"],
         )
 
     # Get the TrainData object from the MNIST dataset
@@ -186,11 +186,12 @@ class EchoStateNetwork(Model):
 
     def evaluate(self, train_data: TrainData):
         self.model.fit(train_data.x_train, train_data.y_train, epochs=1000)
-        mse_loss = self.model.evaluate(train_data.x_test, train_data.y_test)
+        predictions = self.model(train_data.x_test)
+        mse_loss = np.mean(tf.keras.losses.MSE(train_data.y_test, predictions))
         return mse_loss
 
 
-class CNN(Model):
+class LeNet5(Model):
     ...
 
 
@@ -233,6 +234,8 @@ class GFZ_CNN(Model):
         self.model.add(keras.layers.Flatten())
         self.model.add(keras.layers.Dense(128, activation="relu"))
         self.model.add(keras.layers.Dense(10, activation="softmax"))
+        self.model.add(keras.layers.Dropout(0.2))
+        self.model.add(keras.layers.Dense(1))
 
         optimizer = keras.optimizers.Adam(
             learning_rate=self.hyperparameters["learning_rate"]

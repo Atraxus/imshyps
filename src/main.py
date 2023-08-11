@@ -6,7 +6,7 @@ from models import EchoStateNetwork as MODEL
 from paramhandler import ParamHandler
 
 
-def main():
+def main():  # TODO: Create function to test all model configs in a folder
     config_path = "configs/esn.json"  # ! Change this to fit the model
 
     # Paramhandler is initialized with the network class and the hyperparameters that the network needs.
@@ -17,9 +17,11 @@ def main():
     print("It will use the following hyperparameters:" + str(MODEL.MODEL_HPARAMS))
 
     # Load data
+    # ! Change this to fit the model
     input_path = "data/temp_europa_2015-2019.nc"
     target_path = "data/targets.csv"
     param_handler.load_data(input_path, target_path, test_size=0.2)
+    # param_handler.load_data()
 
     # results = generate_random_results()
     results = param_handler.run()
