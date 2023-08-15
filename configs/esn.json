@@ -1,4 +1,5 @@
 {
+  "model": "EchoStateNetwork",
   "metrics": ["accuracy"],
   "params": {
     "num_units": {

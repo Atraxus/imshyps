@@ -192,7 +192,71 @@ class EchoStateNetwork(Model):
 
 
 class LeNet5(Model):
-    ...
+    model: keras.Sequential
+    metrics: list
+    hyperparameters: dict
+    MODEL_HPARAMS = [
+        "learning_rate",
+        "batch_size",
+        "activation_function",
+        "kernel_size",
+        "number_of_filters",
+    ]
+
+    def __init__(self, hyperparameters: dict, metrics: list = None):
+        super(LeNet5, self).__init__()
+        self.hyperparameters = hyperparameters
+        if metrics is None:
+            metrics = ["accuracy"]
+
+        activation_function = self.hyperparameters.get("activation_function", "relu")
+        kernel_size = self.hyperparameters.get("kernel_size", (5, 5))
+        num_filters = self.hyperparameters.get("number_of_filters", [6, 16])
+
+        self.model = keras.models.Sequential(
+            [
+                keras.layers.InputLayer(input_shape=(28, 28, 1)),
+                keras.layers.Conv2D(
+                    num_filters[0],
+                    kernel_size=kernel_size,
+                    activation=activation_function,
+                ),
+                keras.layers.MaxPooling2D(pool_size=(2, 2)),
+                keras.layers.Conv2D(
+                    num_filters[1],
+                    kernel_size=kernel_size,
+                    activation=activation_function,
+                ),
+                keras.layers.MaxPooling2D(pool_size=(2, 2)),
+                keras.layers.Flatten(),
+                keras.layers.Dense(120, activation=activation_function),
+                keras.layers.Dense(84, activation=activation_function),
+                keras.layers.Dense(10, activation="softmax"),
+            ]
+        )
+
+        optimizer = keras.optimizers.Adam(
+            learning_rate=self.hyperparameters["learning_rate"]
+        )
+        self.model.compile(
+            optimizer=optimizer, loss="sparse_categorical_crossentropy", metrics=metrics
+        )
+
+    def load_data(
+        self, input_path: str = None, target_path: str = None, test_size: float = 0.2
+    ):
+        mnist = keras.datasets.mnist
+        (x_train, y_train), (x_test, y_test) = mnist.load_data()
+        x_train = x_train[..., tf.newaxis].astype("float32") / 255.0
+        x_test = x_test[..., tf.newaxis].astype("float32") / 255.0
+        return x_train, y_train, x_test, y_test
+
+    def evaluate(self, x_train, y_train, x_test, y_test):
+        self.model.fit(
+            x_train, y_train, epochs=10, batch_size=self.hyperparameters["batch_size"]
+        )
+        _, accuracy = self.model.evaluate(x_test, y_test)
+        return accuracy
 
 
 class GFZ_CNN(Model):
