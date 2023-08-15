@@ -11,7 +11,7 @@ from models import Model, TrainData
 # Returns samples for a given parameter definition
 # Respects the type and removes duplicates
 # E.g. if type is int and we have samples in [1,3] then we return 1,2,3
-def get_param_samples(param_def, num_samples=40):
+def get_param_samples(param_def, num_samples=2):
     if param_def["type"] == "float":
         return np.linspace(param_def["min"], param_def["max"], num_samples).tolist()
     elif param_def["type"] == "int":
@@ -25,6 +25,8 @@ def get_param_samples(param_def, num_samples=40):
     elif param_def["type"] == "bool":
         return [True, False]
     elif param_def["type"] == "str":
+        return param_def["samples"]
+    elif param_def["type"] == "list":
         return param_def["samples"]
     else:
         print("Invalid type in config file!")
@@ -83,7 +85,9 @@ class ParamHandler:
                 param_dict = dict(defaults)
                 param_dict[param.name] = value
                 model = self.model_class(param_dict, self.metrics)
-                print(f"Running model with parameters {param_dict}")
+                print(
+                    f"Running model with parameters {param_dict}. Progress: {len(results)}/{self.total_num_samples()}"
+                )
                 result = model.evaluate(self.train_data)
                 results.append((result, param_dict))
 

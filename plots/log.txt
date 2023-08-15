@@ -12,3 +12,44 @@ connectivity: 4.94149039040629e-05
 spectral_radius: 3.855358960872978e-05
 learning_rate: 0.02647025779110094
 
+MLP (normalization: 1049.288386106491, num samples: 43, time: N/A)
+learning_rate: 6.380568507245867e-05
+batch_size: 1.6498285153654165e-05
+activation_function: 0.0011703417210019906
+num_layers: 2.983129480897791e-06
+num_neurons: 4.319816711748486e-05
+
+MLP (normalization: False, num samples: 43, time: 00:17:51)
+learning_rate: 6.428807632496672e-05
+batch_size: 1.5612965137350684e-05
+activation_function: 0.0032115370224535143
+num_layers: 7.782473695669979e-06
+num_neurons: 3.05817606527341e-05
+
+MLP (normalization: False, num samples: 5, time: 00:02:43)
+learning_rate: 0.00036937373591086956
+batch_size: 4.301193699607353e-05
+activation_function: 0.002272151042738695
+num_layers: 2.2952508912155167e-05
+num_neurons: 0.00015373201071554378
+
+MLP (normalization: False, num samples: 5, time: 00:01:21)
+learning_rate: 0.00043177379809065995
+batch_size: 7.41549907639083e-05
+activation_function: 0.0036811974677224855
+num_layers: 2.017252506281153e-05
+num_neurons: 8.6844030243185e-05
+
+MLP (normalization: False, num samples: 5, time: 00:01:17)
+learning_rate: 0.0003647815566048962
+batch_size: 4.682737843775264e-05
+activation_function: 0.0021088007587889046
+num_layers: 2.0300067377299058e-05
+num_neurons: 0.00016147766838315648
+
+MLP (normalization: False, num samples: 5, time: 00:01:18)
+learning_rate: 0.0003666137321152974
+batch_size: 4.513234340453032e-05
+activation_function: 0.0045479640484406
+num_layers: 3.5772415437840266e-05
+num_neurons: 0.00016858635142682487

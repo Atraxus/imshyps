@@ -1,3 +1,5 @@
+import time
+
 import matplotlib.pyplot as plt
 
 
@@ -57,7 +59,11 @@ def get_performances(results: list, param_name: str, defaults: list):
 # The results need to be a list of tuples (performance, hyperparameters) for each combination,
 # where hyperparameters is a dictionary.
 def analysis(
-    model_name: str, results: list, hyperparameters: list, normalize: bool = True
+    model_name: str,
+    results: list,
+    hyperparameters: list,
+    normalize: bool = True,
+    runtime: float = None,
 ):
     defaults = [(param.name, param.default) for param in hyperparameters]
 
@@ -79,6 +85,10 @@ def analysis(
 
     # Append imporatance scores to the log file in the plots folder
     with open("./plots/log.txt", "a") as f:
+        if runtime is not None:
+            timeString = time.strftime("%H:%M:%S", time.gmtime(runtime))
+        else:
+            timeString = "N/A"
         num_samples = len(just_performances)
         f.write(
             model_name
@@ -86,6 +96,8 @@ def analysis(
             + str(normalize)
             + ", num samples: "
             + str(num_samples)
+            + ", time: "
+            + timeString
             + ")\n"
         )
         for score, hp in importance_scores:

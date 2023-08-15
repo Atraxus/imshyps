@@ -15,6 +15,8 @@ import tensorflow as tf  # trunk-ignore(ruff/E402)
 import tensorflow_addons as tfa  # trunk-ignore(ruff/E402)
 from tensorflow import keras  # trunk-ignore(ruff/E402)
 
+tf.get_logger().setLevel("ERROR")
+
 
 class TrainData:
     x_train: tf.Tensor
@@ -131,10 +133,13 @@ class MLP(Model):
         self.model.fit(
             train_data.x_train,
             train_data.y_train,
-            epochs=10,
+            epochs=1,
             batch_size=self.hyperparameters["batch_size"],
+            verbose=0,
         )
-        _, accuracy = self.model.evaluate(train_data.x_test, train_data.y_test)
+        _, accuracy = self.model.evaluate(
+            train_data.x_test, train_data.y_test, verbose=0
+        )
         return accuracy
 
 
@@ -185,7 +190,7 @@ class EchoStateNetwork(Model):
         return TrainData(x_train, y_train, x_test, y_test)
 
     def evaluate(self, train_data: TrainData):
-        self.model.fit(train_data.x_train, train_data.y_train, epochs=1000)
+        self.model.fit(train_data.x_train, train_data.y_train, epochs=1000, verbose=0)
         predictions = self.model(train_data.x_test)
         mse_loss = np.mean(tf.keras.losses.MSE(train_data.y_test, predictions))
         return mse_loss
@@ -204,7 +209,6 @@ class LeNet5(Model):
     ]
 
     def __init__(self, hyperparameters: dict, metrics: list = None):
-        super(LeNet5, self).__init__()
         self.hyperparameters = hyperparameters
         if metrics is None:
             metrics = ["accuracy"]
@@ -249,13 +253,19 @@ class LeNet5(Model):
         (x_train, y_train), (x_test, y_test) = mnist.load_data()
         x_train = x_train[..., tf.newaxis].astype("float32") / 255.0
         x_test = x_test[..., tf.newaxis].astype("float32") / 255.0
-        return x_train, y_train, x_test, y_test
+        return TrainData(x_train, y_train, x_test, y_test)
 
-    def evaluate(self, x_train, y_train, x_test, y_test):
+    def evaluate(self, train_data: TrainData):
         self.model.fit(
-            x_train, y_train, epochs=10, batch_size=self.hyperparameters["batch_size"]
+            train_data.x_train,
+            train_data.y_train,
+            epochs=1,
+            batch_size=self.hyperparameters["batch_size"],
+            verbose=0,
         )
-        _, accuracy = self.model.evaluate(x_test, y_test)
+        _, accuracy = self.model.evaluate(
+            train_data.x_test, train_data.y_test, verbose=0
+        )
         return accuracy
 
 
@@ -317,6 +327,9 @@ class GFZ_CNN(Model):
             train_data.y_train,
             epochs=10,
             batch_size=self.hyperparameters["batch_size"],
+            verbose=0,
         )
-        _, accuracy = self.model.evaluate(train_data.x_test, train_data.y_test)
+        _, accuracy = self.model.evaluate(
+            train_data.x_test, train_data.y_test, verbose=0
+        )
         return accuracy
