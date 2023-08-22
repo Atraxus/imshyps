@@ -1,6 +1,5 @@
 import os
 from abc import ABC, abstractmethod
-from enum import Enum
 
 import numpy as np
 import xarray as xr
@@ -37,18 +36,6 @@ class TrainData:
         self.y_test = y_test
 
 
-class EvalMetrics(Enum):
-    ACCURACY = "accuracy"
-    BINARY_ACCURACY = "binary_accuracy"
-    CATEGORICAL_ACCURACY = "categorical_accuracy"
-    BINARY_CROSSENTROPY = "binary_crossentropy"
-    CATEGORICAL_CROSSENTROPY = "categorical_crossentropy"
-    MEAN_SQUARED_ERROR = "mean_squared_error"
-    MEAN_ABSOLUTE_ERROR = "mean_absolute_error"
-    MEAN_ABSOLUTE_PERCENTAGE_ERROR = "mean_absolute_percentage_error"
-    AUC = "AUC"
-
-
 class Model(ABC):
     # List of hyperparameters that the model needs. These will be read from
     # the config file. If a config file does not contain all of these, it is
@@ -58,9 +45,7 @@ class Model(ABC):
     @abstractmethod
     # Initialize the model with the given hyperparameters. It is a dict with
     # key-value pairs. The default metric used for evaluation is accuracy.
-    def __init__(self, hyperparameters: dict, metrics: list = None):
-        if metrics is None:
-            metrics = [EvalMetrics.ACCURACY]
+    def __init__(self, hyperparameters: dict):
         pass
 
     @abstractmethod
@@ -78,7 +63,6 @@ class Model(ABC):
 
 class MLP(Model):
     model: keras.Sequential
-    metrics: list
     hyperparameters: dict
     MODEL_HPARAMS = [
         "learning_rate",
@@ -88,11 +72,8 @@ class MLP(Model):
         "num_neurons",
     ]
 
-    def __init__(self, hyperparameters: dict, metrics: list = None):
-        if metrics is None:
-            metrics = [EvalMetrics.ACCURACY]
+    def __init__(self, hyperparameters: dict):
         self.hyperparameters = hyperparameters
-        self.metrics = metrics
 
         self.model = keras.models.Sequential()
 
@@ -112,7 +93,7 @@ class MLP(Model):
         self.model.compile(
             optimizer=optimizer,
             loss="sparse_categorical_crossentropy",
-            metrics=metrics,
+            metrics=["accuracy"],
         )
 
     # Get the TrainData object from the MNIST dataset
@@ -145,7 +126,6 @@ class MLP(Model):
 
 class EchoStateNetwork(Model):
     model: keras.Sequential
-    metrics: list
     hyperparameters: dict
     MODEL_HPARAMS = [
         "num_units",
@@ -155,11 +135,8 @@ class EchoStateNetwork(Model):
         "learning_rate",
     ]
 
-    def __init__(self, hyperparameters: dict, metrics: list = None):
-        if metrics is None:
-            metrics = [EvalMetrics.ACCURACY]
+    def __init__(self, hyperparameters: dict):
         self.hyperparameters = hyperparameters
-        self.metrics = metrics
 
         esn_layer = tfa.layers.ESN(
             units=self.hyperparameters["num_units"],
@@ -176,7 +153,6 @@ class EchoStateNetwork(Model):
                 learning_rate=self.hyperparameters["learning_rate"]
             ),
             loss="mean_squared_error",
-            # metrics=[tf.keras.metrics.Accuracy()], # TODO
         )
 
     def load_data(input_path: str, target_path: str, test_size: float = 0.2):
@@ -198,7 +174,6 @@ class EchoStateNetwork(Model):
 
 class LeNet5(Model):
     model: keras.Sequential
-    metrics: list
     hyperparameters: dict
     MODEL_HPARAMS = [
         "learning_rate",
@@ -208,10 +183,8 @@ class LeNet5(Model):
         "number_of_filters",
     ]
 
-    def __init__(self, hyperparameters: dict, metrics: list = None):
+    def __init__(self, hyperparameters: dict):
         self.hyperparameters = hyperparameters
-        if metrics is None:
-            metrics = ["accuracy"]
 
         activation_function = self.hyperparameters.get("activation_function", "relu")
         kernel_size = self.hyperparameters.get("kernel_size", (5, 5))
@@ -243,7 +216,9 @@ class LeNet5(Model):
             learning_rate=self.hyperparameters["learning_rate"]
         )
         self.model.compile(
-            optimizer=optimizer, loss="sparse_categorical_crossentropy", metrics=metrics
+            optimizer=optimizer,
+            loss="sparse_categorical_crossentropy",
+            metrics=["accuracy"],
         )
 
     def load_data(
@@ -280,7 +255,6 @@ class GFZ_CNN(Model):
     # dropout (Dropout)
     # regression_head_1 (Dense)
     model: keras.Sequential
-    metrics: list
     hyperparameters: dict
     MODEL_HPARAMS = [
         "learning_rate",
@@ -294,11 +268,8 @@ class GFZ_CNN(Model):
         "structured_data_block_1/normalize",
     ]
 
-    def __init__(self, hyperparameters: dict, metrics: list = None):
-        if metrics is None:
-            metrics = [EvalMetrics.ACCURACY]
+    def __init__(self, hyperparameters: dict):
         self.hyperparameters = hyperparameters
-        self.metrics = metrics
 
         self.model = keras.models.Sequential()
 
@@ -317,7 +288,7 @@ class GFZ_CNN(Model):
         self.model.compile(
             optimizer=optimizer,
             loss="sparse_categorical_crossentropy",
-            metrics=metrics,
+            metrics=["accuracy"],
         )
 
     # Train the model and return the accuracy
