@@ -114,7 +114,7 @@ class MLP(Model):
         self.model.fit(
             train_data.x_train,
             train_data.y_train,
-            epochs=1,
+            epochs=20,
             batch_size=self.hyperparameters["batch_size"],
             verbose=0,
         )
@@ -234,7 +234,7 @@ class LeNet5(Model):
         self.model.fit(
             train_data.x_train,
             train_data.y_train,
-            epochs=1,
+            epochs=20,
             batch_size=self.hyperparameters["batch_size"],
             verbose=0,
         )

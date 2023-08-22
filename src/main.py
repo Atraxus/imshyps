@@ -52,7 +52,7 @@ def main():
         results = param_handler.run()
         elapsed_time = time.time() - start_time
 
-        analysis(model_name, results, param_handler.params, elapsed_time)
+        analysis(model_name, results, param_handler.params, runtime=elapsed_time)
 
 
 if __name__ == "__main__":

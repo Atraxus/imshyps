@@ -11,7 +11,7 @@ from models import Model, TrainData
 # Returns samples for a given parameter definition
 # Respects the type and removes duplicates
 # E.g. if type is int and we have samples in [1,3] then we return 1,2,3
-def get_param_samples(param_def, num_samples=2):
+def get_param_samples(param_def, num_samples=40):
     if param_def["type"] == "float":
         return np.linspace(param_def["min"], param_def["max"], num_samples).tolist()
     elif param_def["type"] == "int":
@@ -39,7 +39,6 @@ class ParamHandler:
     MODEL_HPARAMS = []
     params: list
     train_data: TrainData
-    metrics: list
 
     def __init__(self, model_class: type, model_hparams: list, config_path: str):
         self.model = None
@@ -56,7 +55,6 @@ class ParamHandler:
     def params_from_config(self, path: str):
         with open(path, "r") as f:
             config = json.load(f)
-        self.metrics = config["metrics"]
         cfg_params = config["params"]
         self.params = []
         for hp in self.MODEL_HPARAMS:
@@ -84,7 +82,7 @@ class ParamHandler:
             for value in param:
                 param_dict = dict(defaults)
                 param_dict[param.name] = value
-                model = self.model_class(param_dict, self.metrics)
+                model = self.model_class(param_dict)
                 print(
                     f"Running model with parameters {param_dict}. Progress: {len(results)}/{self.total_num_samples()}"
                 )

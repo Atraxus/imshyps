@@ -4,9 +4,9 @@
   "params": {
     "num_units": {
       "type": "int",
-      "default": 100,
-      "min": 10,
-      "max": 2000
+      "default": 3000,
+      "min": 1000,
+      "max": 6000
     },
     "connectivity": {
       "type": "float",

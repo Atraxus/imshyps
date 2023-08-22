@@ -62,15 +62,9 @@ def analysis(
     model_name: str,
     results: list,
     hyperparameters: list,
-    normalize: bool = True,
     runtime: float = None,
 ):
     defaults = [(param.name, param.default) for param in hyperparameters]
-
-    # Normalize the results
-    if normalize:
-        max_perf = max([tup[0] for tup in results])
-        results = [(tup[0] / max_perf, tup[1]) for tup in results]
 
     importance_scores = []
     for hp in hyperparameters:
@@ -92,9 +86,7 @@ def analysis(
         num_samples = len(just_performances)
         f.write(
             model_name
-            + " (normalization: "
-            + str(normalize)
-            + ", num samples: "
+            + "(num samples: "
             + str(num_samples)
             + ", time: "
             + timeString

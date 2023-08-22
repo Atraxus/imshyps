@@ -53,3 +53,25 @@ batch_size: 4.513234340453032e-05
 activation_function: 0.0045479640484406
 num_layers: 3.5772415437840266e-05
 num_neurons: 0.00016858635142682487
+
+MLP (normalization: 455.47265911102295, num samples: 43, time: N/A)
+learning_rate: 0.00013533976191048785
+batch_size: 3.801755227100989e-05
+activation_function: 0.002606258338056233
+num_layers: 3.249915664651222e-05
+num_neurons: 8.851299262548139e-05
+
+MLP (num samples: 43, time: 00:07:07)
+learning_rate: 0.000124542937173418
+batch_size: 3.1582461749621554e-05
+activation_function: 0.00426785148180025
+num_layers: 5.295426470354413e-05
+num_neurons: 8.801767628430164e-05
+
+EchoStateNetwork(num samples: 4, time: 00:04:39)
+num_units: 2062.311738021832
+leakage: 2726.030590639959
+connectivity: 92.6631726869964
+spectral_radius: 3970.6439704961813
+learning_rate: 3199673.3713146746
+
