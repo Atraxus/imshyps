@@ -3,7 +3,7 @@ Imshyps is a python module for importance score calculations using a fANOVA appr
 
 ## Packages
 
-These are the packages and versions installed in my miniconda environment (pip list output):
+These are the packages and versions installed in my miniconda environment (not all of these are needed for the project to run):
 
 ```
 Package                      Version
