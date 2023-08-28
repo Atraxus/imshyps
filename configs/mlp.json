@@ -5,7 +5,7 @@
     "learning_rate": {
       "type": "float",
       "default": 0.001,
-      "min": 0.0001,
+      "min": 0.00001,
       "max": 0.01
     },
     "batch_size": {
@@ -20,7 +20,6 @@
       "samples": [
         "relu",
         "sigmoid",
-        "softmax",
         "softplus",
         "softsign",
         "tanh",
@@ -33,7 +32,7 @@
       "type": "int",
       "default": 1,
       "min": 1,
-      "max": 3
+      "max": 5
     },
     "num_neurons": {
       "type": "int",

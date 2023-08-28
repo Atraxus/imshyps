@@ -100,13 +100,10 @@ class MLP(Model):
     def load_data(
         input_path: str = None, target_path: str = None, test_size: float = 0.2
     ):
-        mnist = keras.datasets.mnist
-        (x_train, y_train), (x_test, y_test) = mnist.load_data()
-
-        # normalize the data
-        x_train = keras.utils.normalize(x_train, axis=1)
-        x_test = keras.utils.normalize(x_test, axis=1)
-
+        fashion_mnist = keras.datasets.fashion_mnist
+        (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
+        x_train = x_train / 255.0
+        x_test = x_test / 255.0
         return TrainData(x_train, y_train, x_test, y_test)
 
     # Train the model and return the accuracy
@@ -114,7 +111,7 @@ class MLP(Model):
         self.model.fit(
             train_data.x_train,
             train_data.y_train,
-            epochs=20,
+            epochs=10,
             batch_size=self.hyperparameters["batch_size"],
             verbose=0,
         )

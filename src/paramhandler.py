@@ -1,5 +1,6 @@
 import gc
 import json
+import time
 
 import numpy as np
 import tensorflow as tf
@@ -11,7 +12,7 @@ from models import Model, TrainData
 # Returns samples for a given parameter definition
 # Respects the type and removes duplicates
 # E.g. if type is int and we have samples in [1,3] then we return 1,2,3
-def get_param_samples(param_def, num_samples=40):
+def get_param_samples(param_def, num_samples=20):
     if param_def["type"] == "float":
         return np.linspace(param_def["min"], param_def["max"], num_samples).tolist()
     elif param_def["type"] == "int":
@@ -86,8 +87,14 @@ class ParamHandler:
                 print(
                     f"Running model with parameters {param_dict}. Progress: {len(results)}/{self.total_num_samples()}"
                 )
+
+                start_time = time.time()
                 result = model.evaluate(self.train_data)
                 results.append((result, param_dict))
+                elapsed_time = time.time() - start_time
+                print(
+                    f"Estimated time remaining: {elapsed_time * (self.total_num_samples() - len(results)) / 60} minutes"
+                )
 
                 del model
                 tf.keras.backend.clear_session()
