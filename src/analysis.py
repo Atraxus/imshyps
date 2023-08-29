@@ -1,11 +1,55 @@
 import time
 
 import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import OneHotEncoder
 
 
-# This function applies the fANOVA algorithm to the results of a single hyperparameter and returns the importance score
+# This function takes in the results from the paramhandler and fits a random forest
+# to the data. It then returns the importance scores for each hyperparameter.
+# The results need to be a list of tuples (performance, hyperparameters) for each combination,
+# where hyperparameters is a dictionary.
+def fanova_importance_scores(results: list, hyperparameters: list):
+    # defaults = [(param.name, param.default) for param in hyperparameters]
+
+    # Create a list of lists for the hyperparameter values
+    hp_values = []
+    for hp in hyperparameters:
+        hp_values.append([tup[1][hp.name] for tup in results])
+
+    # Convert the list of lists to a 2D array
+    hp_values = np.array(hp_values).T
+
+    # Create a list of performances
+    performances = [tup[0] for tup in results]
+
+    # Encode the categorical variables
+    encoder = OneHotEncoder(sparse=False, handle_unknown="ignore")
+    hp_values_encoded = encoder.fit_transform(hp_values)
+
+    # Fit the random forest
+    rf = RandomForestRegressor()
+    rf.fit(hp_values_encoded, performances)
+
+    # Print the importance scores
+    print("Importance scores:")
+    feature_names = encoder.get_feature_names_out()
+    aggregated_importances = {hp.name: 0 for hp in hyperparameters}
+    for i, name in enumerate(feature_names):
+        hp_name = name.split("_")[0]
+        aggregated_importances[
+            hyperparameters[int(hp_name[1:])].name
+        ] += rf.feature_importances_[i]
+    for hp_name, importance in aggregated_importances.items():
+        print(f"{hp_name}: {importance}")
+
+    return aggregated_importances
+
+
+# This function the variance for the results of a single hyperparameter and returns the importance score
 # This takes the performances as a list without the corresponding hpvalue. Don´t pass a list tuples here.
-def fanova(performances: list):
+def hp_variance(performances: list):
     variance = sum(
         [
             (performance - sum(performances) / len(performances)) ** 2
@@ -66,6 +110,9 @@ def analysis(
 ):
     defaults = [(param.name, param.default) for param in hyperparameters]
 
+    # Calculate fANOVA importance scores
+    fanova_importances = fanova_importance_scores(results, hyperparameters)
+
     importance_scores = []
     for hp in hyperparameters:
         performances = get_performances(results, hp.name, defaults)
@@ -74,10 +121,14 @@ def analysis(
 
         # Remove hp values
         just_performances = [tup[0] for tup in performances]
-        print(f"Importance score for {hp.name}: {fanova(just_performances)}")
-        importance_scores.append((fanova(just_performances), hp.name))
+        variance_importance = hp_variance(just_performances)
+        print(f"Variance Importance score for {hp.name}: {variance_importance}")
+        print(f"fANOVA Importance score for {hp.name}: {fanova_importances[hp.name]}")
+        importance_scores.append(
+            (variance_importance, fanova_importances[hp.name], hp.name)
+        )
 
-    # Append imporatance scores to the log file in the plots folder
+    # Append importance scores to the log file in the plots folder
     with open("./plots/log.txt", "a") as f:
         if runtime is not None:
             timeString = time.strftime("%H:%M:%S", time.gmtime(runtime))
@@ -92,6 +143,13 @@ def analysis(
             + timeString
             + ")\n"
         )
-        for score, hp in importance_scores:
-            f.write(hp + ": " + str(score) + "\n")
+        for variance_score, fanova_score, hp in importance_scores:
+            f.write(
+                hp
+                + ": Variance="
+                + str(variance_score)
+                + ", fANOVA="
+                + str(fanova_score)
+                + "\n"
+            )
         f.write("\n")
