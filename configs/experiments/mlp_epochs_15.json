@@ -1,0 +1,48 @@
+{
+    "model": "MLP",
+    "metrics": [
+        "accuracy"
+    ],
+    "epochs": 15,
+    "samples": 20,
+    "params": {
+        "learning_rate": {
+            "type": "float",
+            "default": 0.001,
+            "min": 1e-05,
+            "max": 0.01
+        },
+        "batch_size": {
+            "type": "int",
+            "default": 32,
+            "min": 32,
+            "max": 128
+        },
+        "activation_function": {
+            "type": "str",
+            "default": "relu",
+            "samples": [
+                "relu",
+                "sigmoid",
+                "softplus",
+                "softsign",
+                "tanh",
+                "selu",
+                "elu",
+                "exponential"
+            ]
+        },
+        "num_layers": {
+            "type": "int",
+            "default": 1,
+            "min": 1,
+            "max": 5
+        },
+        "num_neurons": {
+            "type": "int",
+            "default": 128,
+            "min": 32,
+            "max": 512
+        }
+    }
+}

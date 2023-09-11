@@ -1,6 +1,8 @@
 {
   "model": "EchoStateNetwork",
   "metrics": ["accuracy"],
+  "epochs": 1000,
+  "samples": 20,
   "params": {
     "num_units": {
       "type": "int",

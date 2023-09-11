@@ -2,6 +2,7 @@ import os
 from abc import ABC, abstractmethod
 
 import numpy as np
+import pandas as pd
 import xarray as xr
 from numpy import genfromtxt
 from sklearn.model_selection import train_test_split
@@ -50,9 +51,7 @@ class Model(ABC):
 
     @abstractmethod
     # Train the model and return the accuracy
-    def load_data(
-        input_path: str = None, target_path: str = None, test_size: float = 0.2
-    ):
+    def load_data(test_size: float = 0.2):
         pass
 
     @abstractmethod
@@ -71,9 +70,11 @@ class MLP(Model):
         "num_layers",
         "num_neurons",
     ]
+    epochs: int
 
-    def __init__(self, hyperparameters: dict):
+    def __init__(self, hyperparameters: dict, epochs: int):
         self.hyperparameters = hyperparameters
+        self.epochs = epochs
 
         self.model = keras.models.Sequential()
 
@@ -97,9 +98,7 @@ class MLP(Model):
         )
 
     # Get the TrainData object from the MNIST dataset
-    def load_data(
-        input_path: str = None, target_path: str = None, test_size: float = 0.2
-    ):
+    def load_data(test_size: float = 0.2):
         fashion_mnist = keras.datasets.fashion_mnist
         (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
         x_train = x_train / 255.0
@@ -111,7 +110,7 @@ class MLP(Model):
         self.model.fit(
             train_data.x_train,
             train_data.y_train,
-            epochs=10,
+            epochs=self.epochs,
             batch_size=self.hyperparameters["batch_size"],
             verbose=0,
         )
@@ -131,9 +130,11 @@ class EchoStateNetwork(Model):
         "spectral_radius",
         "learning_rate",
     ]
+    epochs: int
 
-    def __init__(self, hyperparameters: dict):
+    def __init__(self, hyperparameters: dict, epochs: int):
         self.hyperparameters = hyperparameters
+        self.epochs = epochs
 
         esn_layer = tfa.layers.ESN(
             units=self.hyperparameters["num_units"],
@@ -152,7 +153,10 @@ class EchoStateNetwork(Model):
             loss="mean_squared_error",
         )
 
-    def load_data(input_path: str, target_path: str, test_size: float = 0.2):
+    def load_data(test_size: float = 0.2):
+        input_path = "data/temp_europa_2015-2019.nc"
+        target_path = "data/targets.csv"
+
         x = xr.open_dataset(input_path)["temp"].to_numpy()
         y = genfromtxt(target_path, delimiter=",")
 
@@ -163,7 +167,9 @@ class EchoStateNetwork(Model):
         return TrainData(x_train, y_train, x_test, y_test)
 
     def evaluate(self, train_data: TrainData):
-        self.model.fit(train_data.x_train, train_data.y_train, epochs=1000, verbose=0)
+        self.model.fit(
+            train_data.x_train, train_data.y_train, epochs=self.epochs, verbose=0
+        )
         predictions = self.model(train_data.x_test)
         mse_loss = np.mean(tf.keras.losses.MSE(train_data.y_test, predictions))
         return mse_loss
@@ -179,9 +185,11 @@ class LeNet5(Model):
         "kernel_size",
         "number_of_filters",
     ]
+    epochs: int
 
-    def __init__(self, hyperparameters: dict):
+    def __init__(self, hyperparameters: dict, epochs: int):
         self.hyperparameters = hyperparameters
+        self.epochs = epochs
 
         activation_function = self.hyperparameters.get("activation_function", "relu")
         kernel_size = self.hyperparameters.get("kernel_size", (5, 5))
@@ -218,9 +226,7 @@ class LeNet5(Model):
             metrics=["accuracy"],
         )
 
-    def load_data(
-        self, input_path: str = None, target_path: str = None, test_size: float = 0.2
-    ):
+    def load_data(self, test_size: float = 0.2):
         mnist = keras.datasets.mnist
         (x_train, y_train), (x_test, y_test) = mnist.load_data()
         x_train = x_train[..., tf.newaxis].astype("float32") / 255.0
@@ -241,63 +247,89 @@ class LeNet5(Model):
         return accuracy
 
 
-class GFZ_CNN(Model):
-    # input_1 (InputLayer)
-    # cast_to_float32 (CastToFloat32)
-    # expand_dims (TFOpLambda)
-    # conv1d (Conv1D)
-    # flatten (Flatten)
-    # dense (Dense)
-    # dense_1 (Dense)
-    # dropout (Dropout)
-    # regression_head_1 (Dense)
-    model: keras.Sequential
+class LucasModel(Model):
     hyperparameters: dict
-    MODEL_HPARAMS = [
-        "learning_rate",
-        "optimizer",
-        "classification_head_1/dropout",
-        "structured_data_block_1/dense_block_1/units_1",
-        "structured_data_block_1/dense_block_1/dropout",
-        "structured_data_block_1/dense_block_1/units_0",
-        "structured_data_block_1/dense_block_1/num_layers",
-        "structured_data_block_1/dense_block_1/use_batchnorm",
-        "structured_data_block_1/normalize",
-    ]
+    model: keras.Model
+    MODEL_HPARAMS = ["Conv1D_filters", "kernel_size", "Dense1_units", "Dense2_units"]
+    epochs: int
 
-    def __init__(self, hyperparameters: dict):
+    def __init__(self, hyperparameters: dict, epochs: int):
+        # Ensure all required hyperparameters are provided
+        for hparam in LucasModel.MODEL_HPARAMS:
+            if hparam not in hyperparameters:
+                raise ValueError(f"Hyperparameter {hparam} not provided")
         self.hyperparameters = hyperparameters
+        self.epochs = epochs
 
-        self.model = keras.models.Sequential()
+    def load_data(
+        test_size: float = 0.2,
+    ):
+        input_path = "./data/lucas.csv"
+        # Load data
+        data = pd.read_csv(input_path)
+        X = data.iloc[:, :-1].values  # All columns except the last one
+        y = data.iloc[:, -1].values  # The last column
 
-        self.model.add(keras.layers.InputLayer(input_shape=(28, 28)))
-        self.model.add(keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=-1)))
-        self.model.add(keras.layers.Conv1D(32, 3, activation="relu"))
-        self.model.add(keras.layers.Flatten())
-        self.model.add(keras.layers.Dense(128, activation="relu"))
-        self.model.add(keras.layers.Dense(10, activation="softmax"))
-        self.model.add(keras.layers.Dropout(0.2))
-        self.model.add(keras.layers.Dense(1))
+        # Split into train and test
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size)
 
-        optimizer = keras.optimizers.Adam(
-            learning_rate=self.hyperparameters["learning_rate"]
+        # Combine X and y for convenience
+        train_combined = np.column_stack((X_train, y_train))
+
+        # Remove rows with NaN values
+        train_cleaned = train_combined[~np.isnan(train_combined).any(axis=1)]
+
+        # Split them back into X and y
+        X_train = train_cleaned[:, :-1]
+        y_train = train_cleaned[:, -1]
+
+        return TrainData(X_train, y_train, X_test, y_test)
+
+    def _build_model(self, inputs):
+        hp = self.hyperparameters
+
+        # prepare data for 1D CNN layer
+        input_node = tf.nest.flatten(inputs)[0]
+        input_node = tf.expand_dims(input_node, axis=2)
+
+        # Ensure input shape's sequence length is valid
+        if input_node.shape[1] <= hp["kernel_size"]:
+            raise ValueError(
+                f"Input shape's sequence length ({input_node.shape[1]}) is less than or equal to the kernel size ({hp['kernel_size']}). Consider using a smaller kernel size or ensuring your input data is correctly processed."
+            )
+
+        # model
+        x = tf.keras.layers.Conv1D(
+            hp["Conv1D_filters"],
+            hp["kernel_size"],
+            activation="LeakyReLU",
+            input_shape=input_node.shape[1:],
+        )(input_node)
+        x = tf.keras.layers.Flatten()(x)
+        x = tf.keras.layers.Dense(hp["Dense1_units"], activation="LeakyReLU")(x)
+        output_node = tf.keras.layers.Dense(hp["Dense2_units"], activation="LeakyReLU")(
+            x
         )
-        self.model.compile(
-            optimizer=optimizer,
-            loss="sparse_categorical_crossentropy",
-            metrics=["accuracy"],
-        )
 
-    # Train the model and return the accuracy
+        return output_node
+
     def evaluate(self, train_data: TrainData):
-        self.model.fit(
+        # Construct the model
+        inputs = tf.keras.Input(shape=(train_data.x_train.shape[1],))
+        outputs = self._build_model(inputs)
+        model = tf.keras.Model(inputs=inputs, outputs=outputs)
+
+        model.compile(optimizer="adam", loss="mse", metrics=["mae"])
+
+        model.fit(
             train_data.x_train,
             train_data.y_train,
-            epochs=10,
-            batch_size=self.hyperparameters["batch_size"],
+            epochs=self.epochs,
+            batch_size=32,
             verbose=0,
         )
-        _, accuracy = self.model.evaluate(
-            train_data.x_test, train_data.y_test, verbose=0
-        )
-        return accuracy
+
+        # Evaluation
+        _, mae = model.evaluate(train_data.x_test, train_data.y_test, verbose=0)
+
+        return mae

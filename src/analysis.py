@@ -103,7 +103,7 @@ def get_performances(results: list, param_name: str, defaults: list):
 # The results need to be a list of tuples (performance, hyperparameters) for each combination,
 # where hyperparameters is a dictionary.
 def analysis(
-    model_name: str,
+    file_name: str,
     results: list,
     hyperparameters: list,
     runtime: float = None,
@@ -116,8 +116,8 @@ def analysis(
     importance_scores = []
     for hp in hyperparameters:
         performances = get_performances(results, hp.name, defaults)
-        plot_name = model_name + "_" + hp.name.replace(" ", "_")
-        plot_hp(performances, plot_name)
+        # plot_name = file_name + "_" + hp.name.replace(" ", "_")
+        # plot_hp(performances, plot_name)
 
         # Remove hp values
         just_performances = [tup[0] for tup in performances]
@@ -135,12 +135,18 @@ def analysis(
         else:
             timeString = "N/A"
         num_samples = len(just_performances)
+
+        # Get average performance for all runs
+        avg_performance = sum(just_performances) / len(just_performances)
+
         f.write(
-            model_name
+            file_name
             + "(num samples: "
             + str(num_samples)
             + ", time: "
             + timeString
+            + ", avg performance: "
+            + str(avg_performance)
             + ")\n"
         )
         for variance_score, fanova_score, hp in importance_scores:

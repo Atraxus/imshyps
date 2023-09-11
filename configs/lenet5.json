@@ -1,6 +1,8 @@
 {
   "model": "LeNet5",
   "metrics": ["accuracy"],
+  "epochs": 20,
+  "samples": 20,
   "params": {
     "learning_rate": {
       "type": "float",

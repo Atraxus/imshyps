@@ -12,7 +12,9 @@ from models import Model, TrainData
 # Returns samples for a given parameter definition
 # Respects the type and removes duplicates
 # E.g. if type is int and we have samples in [1,3] then we return 1,2,3
-def get_param_samples(param_def, num_samples=20):
+def get_param_samples(param_def, num_samples):
+    if num_samples is None:
+        num_samples = 20
     if param_def["type"] == "float":
         return np.linspace(param_def["min"], param_def["max"], num_samples).tolist()
     elif param_def["type"] == "int":
@@ -38,7 +40,9 @@ class ParamHandler:
     model: Model
     model_class: type
     MODEL_HPARAMS = []
-    params: list
+    params = []
+    epochs: int
+    samples: int
     train_data: TrainData
 
     def __init__(self, model_class: type, model_hparams: list, config_path: str):
@@ -48,14 +52,15 @@ class ParamHandler:
         self.params_from_config(config_path)
         self.train_data = None
 
-    def load_data(
-        self, input_path: str = None, target_path: str = None, test_size: float = 0.2
-    ):
-        self.train_data = self.model_class.load_data(input_path, target_path, test_size)
+    def load_data(self, test_size: float = 0.2):
+        self.train_data = self.model_class.load_data(test_size)
 
     def params_from_config(self, path: str):
         with open(path, "r") as f:
             config = json.load(f)
+        self.epochs = config["epochs"]
+        self.samples = config["samples"]
+
         cfg_params = config["params"]
         self.params = []
         for hp in self.MODEL_HPARAMS:
@@ -63,7 +68,7 @@ class ParamHandler:
                 raise ValueError("Invalid config file")
 
             param_cfg = cfg_params[hp]
-            samples = get_param_samples(param_cfg)
+            samples = get_param_samples(param_cfg, self.samples)
             default = param_cfg["default"]
 
             param = HyperParameter(hp, samples, default)
@@ -83,7 +88,7 @@ class ParamHandler:
             for value in param:
                 param_dict = dict(defaults)
                 param_dict[param.name] = value
-                model = self.model_class(param_dict)
+                model = self.model_class(param_dict, self.epochs)
                 print(
                     f"Running model with parameters {param_dict}. Progress: {len(results)}/{self.total_num_samples()}"
                 )
