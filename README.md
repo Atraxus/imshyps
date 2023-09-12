@@ -11,6 +11,7 @@ Package                      Version
 ---------------------------- ---------
 keras                        2.13.1
 matplotlib                   3.7.2
+netCDF4                      1.6.4
 numpy                        1.24.3
 scikit-learn                 1.3.0
 tensorflow                   2.13.0
