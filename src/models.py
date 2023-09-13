@@ -275,13 +275,17 @@ class LucasModel(Model):
 
         # Combine X and y for convenience
         train_combined = np.column_stack((X_train, y_train))
+        test_combined = np.column_stack((X_test, y_test))
 
         # Remove rows with NaN values
         train_cleaned = train_combined[~np.isnan(train_combined).any(axis=1)]
+        test_cleaned = test_combined[~np.isnan(test_combined).any(axis=1)]
 
         # Split them back into X and y
         X_train = train_cleaned[:, :-1]
         y_train = train_cleaned[:, -1]
+        X_test = test_cleaned[:, :-1]
+        y_test = test_cleaned[:, -1]
 
         return TrainData(X_train, y_train, X_test, y_test)
 
