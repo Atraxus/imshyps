@@ -116,8 +116,8 @@ def analysis(
     importance_scores = []
     for hp in hyperparameters:
         performances = get_performances(results, hp.name, defaults)
-        # plot_name = file_name + "_" + hp.name.replace(" ", "_")
-        # plot_hp(performances, plot_name)
+        plot_name = file_name + "_" + hp.name.replace(" ", "_")
+        plot_hp(performances, plot_name)
 
         # Remove hp values
         just_performances = [tup[0] for tup in performances]
@@ -129,7 +129,7 @@ def analysis(
         )
 
     # Append importance scores to the log file in the plots folder
-    with open("./plots/log.txt", "a") as f:
+    with open("./log.txt", "a") as f:
         if runtime is not None:
             timeString = time.strftime("%H:%M:%S", time.gmtime(runtime))
         else:
@@ -158,4 +158,13 @@ def analysis(
                 + str(fanova_score)
                 + "\n"
             )
+        f.write("\n")
+
+    with open("./results_log.txt", "a") as f:
+        f.write(file_name + ": " + str(avg_performance) + "\n")
+        f.write("Results:\n")
+        resultsString = ""
+        for result in results:
+            resultsString += "    " + str(result) + "\n"
+        f.write(resultsString)
         f.write("\n")

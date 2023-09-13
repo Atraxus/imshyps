@@ -1,0 +1,13 @@
+esn: 8220.577880859375
+Results:
+    (8705.044, {'num_units': 10, 'leakage': 0.5, 'connectivity': 0.3, 'spectral_radius': 0.8, 'learning_rate': 0.001})
+    (8530.675, {'num_units': 60, 'leakage': 0.5, 'connectivity': 0.3, 'spectral_radius': 0.8, 'learning_rate': 0.001})
+    (8503.915, {'num_units': 30, 'leakage': 0.1, 'connectivity': 0.3, 'spectral_radius': 0.8, 'learning_rate': 0.001})
+    (8626.104, {'num_units': 30, 'leakage': 0.9, 'connectivity': 0.3, 'spectral_radius': 0.8, 'learning_rate': 0.001})
+    (8659.253, {'num_units': 30, 'leakage': 0.5, 'connectivity': 0.1, 'spectral_radius': 0.8, 'learning_rate': 0.001})
+    (8697.823, {'num_units': 30, 'leakage': 0.5, 'connectivity': 0.5, 'spectral_radius': 0.8, 'learning_rate': 0.001})
+    (8853.496, {'num_units': 30, 'leakage': 0.5, 'connectivity': 0.3, 'spectral_radius': 0.1, 'learning_rate': 0.001})
+    (8828.307, {'num_units': 30, 'leakage': 0.5, 'connectivity': 0.3, 'spectral_radius': 0.9, 'learning_rate': 0.001})
+    (8733.011, {'num_units': 30, 'leakage': 0.5, 'connectivity': 0.3, 'spectral_radius': 0.8, 'learning_rate': 0.0001})
+    (7708.145, {'num_units': 30, 'leakage': 0.5, 'connectivity': 0.3, 'spectral_radius': 0.8, 'learning_rate': 0.01})
+
