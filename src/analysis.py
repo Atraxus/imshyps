@@ -16,7 +16,12 @@ def fanova_importance_scores(results: list, hyperparameters: list):
     # Create a list of lists for the hyperparameter values
     hp_values = []
     for hp in hyperparameters:
-        hp_values.append([tup[1][hp.name] for tup in results])
+        if isinstance(results[0][1][hp.name], list):  # checking if value is a list
+            hp_values.append(
+                [str(tup[1][hp.name]) for tup in results]
+            )  # Convert inner list to string
+        else:
+            hp_values.append([tup[1][hp.name] for tup in results])
 
     # Convert the list of lists to a 2D array
     hp_values = np.array(hp_values).T

@@ -237,7 +237,7 @@ class LeNet5(Model):
         self.model.fit(
             train_data.x_train,
             train_data.y_train,
-            epochs=20,
+            epochs=self.epochs,
             batch_size=self.hyperparameters["batch_size"],
             verbose=0,
         )
